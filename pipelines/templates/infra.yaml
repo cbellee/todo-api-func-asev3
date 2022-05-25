@@ -37,6 +37,7 @@ jobs:
               targetPath: $(Build.SourcesDirectory)/bicep
 
           - task: AzureCLI@2
+            name: bicep
             inputs:
               azureSubscription: $(azureSubscription)
               scriptType: bash
@@ -58,9 +59,8 @@ jobs:
                   --name ${{ parameters.deploymentName }} \
                   --query properties.outputs.functionName.value)
 
-          - pwsh: |
                 echo "##vso[task.setvariable variable=funcName;isOutput=true]$FUNC_NAME"
-            name: outputVars
+
 
 
 

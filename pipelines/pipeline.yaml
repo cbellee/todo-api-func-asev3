@@ -24,7 +24,7 @@ stages:
   displayName: 'Dev Function Deployment'
   variables: 
     - name: funcAppName
-      value: $[ stageDependencies.dev_infra.infra.outputs['outputVars.funcName'] ]
+      value: $[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]
   jobs:
     - template: templates/deploy.yaml
       parameters:
@@ -48,7 +48,7 @@ stages:
   displayName: 'Prod Function Deployment'  
   variables: 
     - name: funcAppName
-      value: $[ stageDependencies.prod_infra.infra.outputs['outputVars.funcName'] ]
+      value: $[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]
   jobs:
     - template: templates/deploy.yaml
       parameters:

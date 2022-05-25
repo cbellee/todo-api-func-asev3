@@ -11,35 +11,39 @@ stages:
 - template: templates/build.yaml
 
 - stage: 'dev infra'
-- template: templates/infra.yaml
-  parameters:
-    azureSubscription: azureSubscription
-    resourceGroupName: "dev-${{ variables['appName'] }}-rg"
-    appName: variables['appName']
-    environmentName: dev
+  jobs:
+    - template: templates/infra.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: "dev-${{ variables['appName'] }}-rg"
+        appName: variables['appName']
+        environmentName: dev
 
 - stage: 'dev_deploy'
-- template: templates/deploy.yaml
-  parameters:
-    azureSubscription: azureSubscription
-    resourceGroupName: "dev-${{ variables['appName'] }}-rg"
-    appName: variables['appName']
-    environmentName: dev
+  jobs:
+    - template: templates/deploy.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: "dev-${{ variables['appName'] }}-rg"
+        appName: variables['appName']
+        environmentName: dev
 
 - stage: 'prod_infra'
-- template: templates/infra.yaml
-  parameters:
-    azureSubscription: azureSubscription
-    resourceGroupName: "prod-${{ variables['appName'] }}-rg"
-    appName: variables['appName']
-    environmentName: prod
+  jobs:
+    - template: templates/infra.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: "prod-${{ variables['appName'] }}-rg"
+        appName: variables['appName']
+        environmentName: prod
     
 - stage: 'prod_deploy'
-- template: templates/deploy.yaml
-  parameters:
-    azureSubscription: azureSubscription
-    resourceGroupName: "prod-${{ variables['appName'] }}-rg"
-    appName: variables['appName']
-    environmentName: prod
-    
+  jobs:
+    - template: templates/deploy.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: "prod-${{ variables['appName'] }}-rg"
+        appName: variables['appName']
+        environmentName: prod
+        
     

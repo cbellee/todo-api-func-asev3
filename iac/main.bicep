@@ -22,25 +22,6 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   }
   properties: {
     supportsHttpsTrafficOnly: true
-    networkAcls: {
-      bypass: 'AzureServices'
-      virtualNetworkRules: []
-      ipRules: []
-      defaultAction: 'Deny'
-    }
-    encryption: {
-      services: {
-        blob: {
-          keyType: 'Account'
-          enabled: true
-        }
-        file: {
-          keyType: 'Account'
-          enabled: true
-        }
-      }
-      keySource: 'Microsoft.Storage'
-    }
   }
 }
 

@@ -3,7 +3,7 @@ parameters:
     type: string
   - name: resourceGroupName
     type: string
-  - name: appName
+  - name: functionAppName
     type: string
   - name: environmentName
     type: string
@@ -30,9 +30,9 @@ jobs:
 
           - task: AzureFunctionApp@1
             inputs:
-              azureSubscription: $(azureSubscription)
-              resourceGroupName: $(resourceGroupName)
+              azureSubscription: ${{ parameters.azureSubscription }}
+              resourceGroupName: ${{ parameters.resourceGroupName }}
               appType: functionAppLinux
-              appName: $(appName)
+              appName: ${{ variables.functionAppName }}
               package: $(System.ArtifactsDirectory)/**/*.zip
       

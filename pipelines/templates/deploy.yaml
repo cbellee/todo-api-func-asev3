@@ -13,7 +13,7 @@ stages:
   jobs:
   - deployment: dev
     displayName: 'Deploy Todo API to $(environmentName)'
-    environment: $(environmentName)-$(appName)
+    environment: "${{ environmentName }}-${{ appName }}"
     workspace:
       clean: all
     timeoutInMinutes: 10

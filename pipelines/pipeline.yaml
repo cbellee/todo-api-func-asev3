@@ -28,7 +28,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]
+        functionAppName: $[ stageDependencies.dev_infra.infra.outputs['infra.bicep.funcName'] ]
         environmentName: dev
 
 - stage: 'prod_infra'
@@ -49,7 +49,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]
+        functionAppName: $[ stageDependencies.prod_infra.infra.outputs['infra.bicep.funcName'] ]
         environmentName: prod
         
     

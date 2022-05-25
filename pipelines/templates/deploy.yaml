@@ -9,9 +9,9 @@ parameters:
     type: string
 
 jobs:
-- deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_deploy"
-  displayName: "Deploy Todo API to ${{ parameters['environmentName'] }}"
-  environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
+- deployment: "${{ parameters.environmentName }}_${{ parameters.appName }}_deploy"
+  displayName: "Deploy Todo API to ${{ parameters.environmentName }}"
+  environment: "${{ parameters.environmentName }}-${{ parameters.appName }}"
   workspace:
     clean: all
   timeoutInMinutes: 10

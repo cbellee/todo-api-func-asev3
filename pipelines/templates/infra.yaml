@@ -18,7 +18,7 @@ parameters:
     default: 'main.bicep'
 
 jobs:
-- deployment: "${{ parameters.environmentName }}_${{ parameters.appName }}_infra"
+- deployment: infra
   displayName: 'Deploy intrastructure to $(environmentName)'
   environment: ${{ parameters.environmentName }}-${{ parameters.appName }}
   workspace:

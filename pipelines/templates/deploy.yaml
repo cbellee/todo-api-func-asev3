@@ -9,7 +9,7 @@ parameters:
     type: string
 
 stages:
-- stage: Application
+- stage: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}-application"
   jobs:
   - deployment: dev
     displayName: "Deploy Todo API to ${{ parameters['environmentName'] }}"

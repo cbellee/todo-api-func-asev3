@@ -21,6 +21,7 @@ stages:
         environmentName: dev
 
 - stage: 'dev_deploy'
+  dependsOn: 'dev_infra'
   displayName: 'Deploy Dev Function'
   variables:
     funcName: $[ dependencies.dev_infra.infra.outputs['infra.bicep.funcName'] ]
@@ -44,6 +45,7 @@ stages:
         environmentName: prod
     
 - stage: 'prod_deploy'
+  dependsOn: 'prod_infra'
   displayName: 'Deploy Prod Function'  
   jobs:
     - template: templates/deploy.yaml

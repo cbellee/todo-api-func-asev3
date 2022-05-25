@@ -13,29 +13,29 @@ stages:
 - template: templates/infra.yaml
   parameters:
     azureSubscription: azureSubscription
-    resourceGroupName: "dev-$(appName)-rg"
-    appName: $(appName)
+    resourceGroupName: "dev-${{ variables['appName'] }}-rg"
+    appName: variables['appName']
     environmentName: dev
 
 - template: templates/deploy.yaml
   parameters:
     azureSubscription: azureSubscription
-    resourceGroupName: "dev-$(appName)-rg"
-    appName: $(appName)
+    resourceGroupName: "dev-${{ variables['appName'] }}-rg"
+    appName: variables['appName']
     environmentName: dev
 
 - template: templates/infra.yaml
   parameters:
     azureSubscription: azureSubscription
-    resourceGroupName: "prod-$(appName)-rg"
-    appName: $(appName)
+    resourceGroupName: "prod-${{ variables['appName'] }}-rg"
+    appName: variables['appName']
     environmentName: prod
     
 - template: templates/deploy.yaml
   parameters:
     azureSubscription: azureSubscription
-    resourceGroupName: "prod-$(appName)-rg"
-    appName: $(appName)
+    resourceGroupName: "prod-${{ variables['appName'] }}-rg"
+    appName: variables['appName']
     environmentName: prod
     
     

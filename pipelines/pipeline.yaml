@@ -30,7 +30,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $(funcAppName)
+        functionAppName: ${{ variables.funcAppName }}
         environmentName: dev
 
 - stage: 'prod_infra'
@@ -53,7 +53,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $(funcAppName)
+        functionAppName: ${{ variables.funcAppName }}
         environmentName: prod
         
     

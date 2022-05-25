@@ -20,9 +20,6 @@ parameters:
 stages:
 - stage: Infra
   jobs:
-  - job: infra
-    pool:
-      vmImage: 'ubuntu-latest'
   - deployment: $(environmentName)-infra-deployment
     displayName: 'Deploy intrastructure to $(environmentName)'
     environment: $(environmentName)

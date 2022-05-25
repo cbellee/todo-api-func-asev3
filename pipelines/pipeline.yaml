@@ -10,44 +10,54 @@ variables:
 
 stages:
   - stage: 'build'
-    displayName: 'Build application'
+    displayName: 'build application'
     pool: 
       vmImage: $(vmImage)
     jobs:
-      - job: 'build'
-      -  template: templates/build.yaml
+    - job: 'build'
+    - template: templates/build.yaml
   
-  - stage: 'infra'
-    displayName: 'Deploy Infrastructure'
+  - stage: 'dev infrastructure deployment'
+    displayName: 'deploy dev infrastructure'
     pool:
       vmImage: $(vmImage)
     jobs:
-      - template: templates/infra.yaml
-        parameters:
-          azureSubscription: azureSubscription
-          resourceGroupName: dev-$(appName)-rg
-          appName: dev-$(appName)
-          environmentName: dev
+    - job: 'infra deployment'
+    - template: templates/infra.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: dev-$(appName)-rg
+        appName: dev-$(appName)
+        environmentName: dev
 
-      - template: templates/deploy.yaml
-        parameters:
-          azureSubscription: azureSubscription
-          resourceGroupName: dev-$(appName)-rg
-          appName: dev-$(appName)
-          environmentName: dev
+  - stage: 'dev application deployment'
+    jobs:
+    - job: 'app deployment'
+    - template: templates/deploy.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: dev-$(appName)-rg
+        appName: dev-$(appName)
+        environmentName: dev
 
-      - template: templates/infra.yaml
-        parameters:
-          azureSubscription: azureSubscription
-          resourceGroupName: prod-$(appName)-rg
-          appName: prod-$(appName)
-          environmentName: prod
-          
-      - template: templates/deploy.yaml
-        parameters:
-          azureSubscription: azureSubscription
-          resourceGroupName: prod-$(appName)-rg
-          appName: prod-$(appName)
-          environmentName: prod
+  - stage: 'prod infrastructure deployment'
+    jobs:
+    - job: 'infra deployment'
+    - template: templates/infra.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: prod-$(appName)-rg
+        appName: prod-$(appName)
+        environmentName: prod
+
+  - stage: 'prod application deployment'     
+    jobs:
+    - job:   
+    - template: templates/deploy.yaml
+      parameters:
+        azureSubscription: azureSubscription
+        resourceGroupName: prod-$(appName)-rg
+        appName: prod-$(appName)
+        environmentName: prod
           
           

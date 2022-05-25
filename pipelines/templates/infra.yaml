@@ -20,7 +20,7 @@ parameters:
 jobs:
 - deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_infra"
   displayName: 'Deploy intrastructure to $(environmentName)'
-  environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
+  environment: ${{ parameters['environmentName'] }}-${{ parameters['appName'] }}
   workspace:
     clean: all
   timeoutInMinutes: 10

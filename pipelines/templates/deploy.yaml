@@ -8,6 +8,8 @@ parameters:
   - name: environmentName
     type: string
 
+stages:
+- stage: Application
 jobs:
   - deployment: dev
     displayName: 'Deploy Todo API to $(environmentName)'

@@ -2,9 +2,6 @@ trigger:
 - main
 
 name: 'todo-api build & deployment'
-resources:
-  repositories:
-    - repository: 
 
 variables:
   azureSubscription: 'Azure CXP FTA Internal Subscription CBELLEE (b2375b5f-8dab-4436-b87c-32bc7fdce5d0)'

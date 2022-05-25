@@ -3,6 +3,8 @@ parameters:
     type: string
   - name: resourceGroupName
     type: string
+  - name: appName
+    type: string
   - name: functionAppName
     type: string
   - name: environmentName

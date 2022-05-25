@@ -25,6 +25,7 @@ stages:
       parameters:
         azureSubscription: azureSubscription
         resourceGroupName: "dev-${{ variables.appName }}-rg"
+        appName: ${{ variables.appName }}
         functionAppName: $[dependencies.dev_infra.outputs['outputVars.funcName']]
         environmentName: dev
 
@@ -43,6 +44,7 @@ stages:
       parameters:
         azureSubscription: azureSubscription
         resourceGroupName: "prod-${{ variables.appName }}-rg"
+        appName: ${{ variables.appName }}
         functionAppName: $[dependencies.dev_infra.outputs['outputVars.funcName']]
         environmentName: prod
         

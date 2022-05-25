@@ -5,7 +5,7 @@ name: 'todo-api build & deployment'
 
 variables:
   azureSubscription: 'Azure CXP FTA Internal Subscription CBELLEE (b2375b5f-8dab-4436-b87c-32bc7fdce5d0)'
-  appName: 'todo-api'
+  appName: 'todoapi'
 
 stages:
 - template: templates/build.yaml

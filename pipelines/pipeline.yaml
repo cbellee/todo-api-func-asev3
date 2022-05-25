@@ -31,7 +31,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: ${{ variables.funcName }}
+        functionAppName: clj5m4jabpga6-dev-todoapi #${{ variables.funcName }}
         environmentName: dev
 
 - stage: 'prod_infra'

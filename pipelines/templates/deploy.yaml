@@ -10,7 +10,7 @@ parameters:
 
 stages:
 - stage: Application
-jobs:
+  jobs:
   - deployment: dev
     displayName: 'Deploy Todo API to $(environmentName)'
     environment: $(environmentName)-$(appName)

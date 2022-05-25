@@ -34,6 +34,7 @@ jobs:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: 'bicep'
+              targetPath: $(Build.SourcesDirectory)/bicep
 
           - task: AzureCLI@2
             inputs:
@@ -47,7 +48,7 @@ jobs:
                 az deployment group create \
                   --name ${{ parameters.deploymentName }} \
                   --resource-group ${{ parameters.resourceGroupName }} \
-                  --template-file ${{ parameters.templateFileName }} \
+                  --template-file $(Build.SourcesDirectory)/bicep/${{ parameters.templateFileName }} \
                   --parameters appName=${{ parameters.appName }} \
                   --parameters location=${{ parameters.location }} \
                   --parameters environmentName=${{ parameters.environmentName }}

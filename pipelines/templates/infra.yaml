@@ -19,11 +19,11 @@ parameters:
 
 jobs:
 - job: infra
-  displayName: 'Deploy intrastructure to $(environmentName)'
+  displayName: 'Deploy intrastructure to ${{ parameters.environmentName }}'
   pool:
     vmImage: 'ubuntu-latest'
     steps: 
-      
+            
     - task: DownloadPipelineArtifact@2
       inputs:
         artifactName: 'bicep'

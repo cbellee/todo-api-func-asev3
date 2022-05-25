@@ -22,16 +22,13 @@ stages:
 
 - stage: 'dev_deploy'
   displayName: 'Deploy Dev Function'
-  variables: 
-    - name: funcAppName
-      value: "$[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]"
   jobs:
     - template: templates/deploy.yaml
       parameters:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: ${{ variables.funcAppName }}
+        functionAppName: "$[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]"
         environmentName: dev
 
 - stage: 'prod_infra'
@@ -46,16 +43,13 @@ stages:
     
 - stage: 'prod_deploy'
   displayName: 'Deploy Prod Function'  
-  variables: 
-    - name: funcAppName
-      value: "$[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]"
   jobs:
     - template: templates/deploy.yaml
       parameters:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: ${{ variables.funcAppName }}
+        functionAppName: "$[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]"
         environmentName: prod
         
     

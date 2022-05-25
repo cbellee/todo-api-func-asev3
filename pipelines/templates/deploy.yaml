@@ -22,6 +22,12 @@ jobs:
       runOnce:
         deploy:
           steps: 
+            - task: DownloadBuildArtifacts@1
+              displayName: 'copy build artifacts'
+              inputs:
+                artifactName: 'drop'
+                buildVersionToDownload: latest
+                
             - task: AzureFunctionApp@1
               inputs:
                 azureSubscription: $(azureSubscription)

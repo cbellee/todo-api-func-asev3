@@ -11,7 +11,7 @@ stages:
 - template: templates/build.yaml
 
 - stage: 'dev_infra'
-  displayName: 'Dev Infrastructure'
+  displayName: 'Dev Infra Deployment'
   jobs:
     - template: templates/infra.yaml
       parameters:
@@ -28,11 +28,11 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $[stageDependencies.dev_infra.outputs['deploy.outputVars.funcName']]
+        functionAppName: $[stageDependencies.dev_infra.infra.outputs['outputVars.funcName']]
         environmentName: dev
 
 - stage: 'prod_infra'
-  displayName: 'Prod Infrastructure'
+  displayName: 'Prod Infra Deployment'
   jobs:
     - template: templates/infra.yaml
       parameters:
@@ -49,7 +49,7 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $[stageDependencies.prod_infra.outputs['deploy.outputVars.funcName']]
+        functionAppName: $[stageDependencies.prod_infra.infra.outputs['outputVars.funcName']]
         environmentName: prod
         
     

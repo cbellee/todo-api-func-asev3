@@ -3,7 +3,7 @@ param appName string
 param environmentName string
 
 var prefix = uniqueString(resourceGroup().id)
-var funcAppName = '${prefix}-appName'
+var funcAppName = '${prefix}-${environmentName}-${appName}'
 var funcStorageAccountName = '${prefix}stor'
 var hostingPlanName = '${prefix}-asp'
 var appInsightsName = '${prefix}-ai'

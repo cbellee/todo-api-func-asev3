@@ -12,7 +12,7 @@ parameters:
     default: 'australiaeast'
   - name: deploymentName
     type: string
-    default: '$(environmentName)-infra-deployment'
+    default: 'infra-deployment'
   - name: templateFileName
     type: string
     default: '../iac/main.bicep'
@@ -38,12 +38,12 @@ jobs:
               scriptLocation: inlineScript
               inlineScript: |
                 az --version
-                az group create --name $(resourceGroupName) --location $(location)
+                az group create --name ${{ parameters.resourceGroupName }} --location ${{ parameters.location }}
 
                 az deployment group create \
-                  --name $(deploymentName) \
-                  --resource-group $(resourceGroupName) \
-                  --template-file $(templateFile) \
-                  --parameters appName=$(appName) \
-                  --parameters location=$(location) \
-                  --parameters environmentName=$(environmentName)
+                  --name ${{ parameters.deploymentName }} \
+                  --resource-group ${{ parameters.resourceGroupName }} \
+                  --template-file ${{ parameters.templateFile }} \
+                  --parameters appName=${{ parameters.appName }} \
+                  --parameters location=${{ parameters.location }} \
+                  --parameters environmentName=${{ parameters.environmentName }}

@@ -8,7 +8,6 @@ variables:
   appName: 'todo-api'
 
 stages:
-- stage: build
 - template: templates/build.yaml
 
 - template: templates/infra.yaml

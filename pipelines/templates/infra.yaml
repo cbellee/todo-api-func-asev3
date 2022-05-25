@@ -17,7 +17,6 @@ parameters:
     type: string
     default: '../iac/main.bicep'
 
-
 jobs:
 - deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_deployment"
   displayName: 'Deploy intrastructure to $(environmentName)'

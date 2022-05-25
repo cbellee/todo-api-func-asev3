@@ -14,7 +14,7 @@ stages:
   jobs:
     - template: templates/infra.yaml
       parameters:
-        azureSubscription: azureSubscription
+        azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
         environmentName: dev
@@ -23,7 +23,7 @@ stages:
   jobs:
     - template: templates/deploy.yaml
       parameters:
-        azureSubscription: azureSubscription
+        azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "dev-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
         functionAppName: $[dependencies.dev_infra.outputs['outputVars.funcName']]
@@ -33,7 +33,7 @@ stages:
   jobs:
     - template: templates/infra.yaml
       parameters:
-        azureSubscription: azureSubscription
+        azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
         environmentName: prod
@@ -42,7 +42,7 @@ stages:
   jobs:
     - template: templates/deploy.yaml
       parameters:
-        azureSubscription: azureSubscription
+        azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
         functionAppName: $[dependencies.dev_infra.outputs['outputVars.funcName']]

@@ -11,7 +11,7 @@ stages:
 - template: templates/build.yaml
 
 - stage: 'dev_infra'
-  displayName: 'Dev Infra Deployment'
+  displayName: 'Deploy Dev Infra'
   jobs:
     - template: templates/infra.yaml
       parameters:
@@ -21,10 +21,10 @@ stages:
         environmentName: dev
 
 - stage: 'dev_deploy'
-  displayName: 'Dev Function Deployment'
+  displayName: 'Deploy Dev Function'
   variables: 
     - name: funcAppName
-      value: $[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]
+      value: "$[ stageDependencies.dev_infra.infra.outputs['bicep.funcName'] ]"
   jobs:
     - template: templates/deploy.yaml
       parameters:
@@ -35,7 +35,7 @@ stages:
         environmentName: dev
 
 - stage: 'prod_infra'
-  displayName: 'Prod Infra Deployment'
+  displayName: 'Deploy Prod Infra'
   jobs:
     - template: templates/infra.yaml
       parameters:
@@ -45,10 +45,10 @@ stages:
         environmentName: prod
     
 - stage: 'prod_deploy'
-  displayName: 'Prod Function Deployment'  
+  displayName: 'Deploy Prod Function'  
   variables: 
     - name: funcAppName
-      value: $[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]
+      value: "$[ stageDependencies.prod_infra.infra.outputs['bicep.funcName'] ]"
   jobs:
     - template: templates/deploy.yaml
       parameters:

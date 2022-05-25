@@ -1,0 +1,66 @@
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: appName
+    type: string
+  - name: environmentName
+    type: string
+  - name: location
+    type: string
+    default: 'australiaeast'
+  - name: deploymentName
+    type: string
+    default: 'infra-deployment'
+  - name: templateFileName
+    type: string
+    default: 'main.bicep'
+
+jobs:
+- deployment: infra
+  displayName: 'Deploy intrastructure to $(environmentName)'
+  environment: ${{ parameters.environmentName }}-${{ parameters.appName }}
+  workspace:
+    clean: all
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 15
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    runOnce:
+      deploy:
+        steps: 
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'bicep'
+              targetPath: $(Build.SourcesDirectory)/bicep
+
+          - task: AzureCLI@2
+            name: bicep
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az --version
+                az group create --name ${{ parameters.resourceGroupName }} --location ${{ parameters.location }}
+
+                az deployment group create \
+                  --name ${{ parameters.deploymentName }} \
+                  --resource-group ${{ parameters.resourceGroupName }} \
+                  --template-file $(Build.SourcesDirectory)/bicep/${{ parameters.templateFileName }} \
+                  --parameters appName=${{ parameters.appName }} \
+                  --parameters location=${{ parameters.location }} \
+                  --parameters environmentName=${{ parameters.environmentName }}
+
+                FUNC_NAME=$(az deployment group show \
+                  --resource-group ${{ parameters.resourceGroupName }} \
+                  --name ${{ parameters.deploymentName }} \
+                  --query properties.outputs.functionName.value)
+
+                echo "##vso[task.setvariable variable=funcName;isOutput=true]$FUNC_NAME"
+
+
+
+

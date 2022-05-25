@@ -60,7 +60,7 @@ jobs:
 
           - pwsh: |
                 echo "##vso[task.setvariable variable=funcName;isOutput=true]$($env:FUNC_NAME)"
-              name: outputVars
+            name: outputVars
 
 
 

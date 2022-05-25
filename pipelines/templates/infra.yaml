@@ -17,35 +17,34 @@ parameters:
     type: string
     default: '../iac/main.bicep'
 
-stages:
-- stage: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}-infra"
-  jobs:
-  - deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_deployment"
-    displayName: 'Deploy intrastructure to $(environmentName)'
-    environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
-    workspace:
-      clean: all
-    timeoutInMinutes: 10
-    cancelTimeoutInMinutes: 15
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-      runOnce:
-        deploy:
-          steps: 
-            - task: AzureCLI@2
-              inputs:
-                azureSubscription: $(azureSubscription)
-                scriptType: bash
-                scriptLocation: inlineScript
-                inlineScript: |
-                  az --version
-                  az group create --name $(resourceGroupName) --location $(location)
 
-                  az deployment group create \
-                    --name $(deploymentName) \
-                    --resource-group $(resourceGroupName) \
-                    --template-file $(templateFile) \
-                    --parameters appName=$(appName) \
-                    --parameters location=$(location) \
-                    --parameters environmentName=$(environmentName)
+jobs:
+- deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_deployment"
+  displayName: 'Deploy intrastructure to $(environmentName)'
+  environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
+  workspace:
+    clean: all
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 15
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    runOnce:
+      deploy:
+        steps: 
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az --version
+                az group create --name $(resourceGroupName) --location $(location)
+
+                az deployment group create \
+                  --name $(deploymentName) \
+                  --resource-group $(resourceGroupName) \
+                  --template-file $(templateFile) \
+                  --parameters appName=$(appName) \
+                  --parameters location=$(location) \
+                  --parameters environmentName=$(environmentName)

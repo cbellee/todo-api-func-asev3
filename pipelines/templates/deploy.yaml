@@ -8,33 +8,31 @@ parameters:
   - name: environmentName
     type: string
 
-stages:
-- stage: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}-application"
-  jobs:
-  - deployment: dev
-    displayName: "Deploy Todo API to ${{ parameters['environmentName'] }}"
-    environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
-    workspace:
-      clean: all
-    timeoutInMinutes: 10
-    cancelTimeoutInMinutes: 15
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-      runOnce:
-        deploy:
-          steps: 
-            - task: DownloadBuildArtifacts@1
-              displayName: 'copy build artifacts'
-              inputs:
-                artifactName: 'drop'
-                buildVersionToDownload: latest
+jobs:
+- deployment: dev
+  displayName: "Deploy Todo API to ${{ parameters['environmentName'] }}"
+  environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
+  workspace:
+    clean: all
+  timeoutInMinutes: 10
+  cancelTimeoutInMinutes: 15
+  pool:
+    vmImage: 'ubuntu-latest'
+  strategy:
+    runOnce:
+      deploy:
+        steps: 
+          - task: DownloadBuildArtifacts@1
+            displayName: 'copy build artifacts'
+            inputs:
+              artifactName: 'drop'
+              buildVersionToDownload: latest
 
-            - task: AzureFunctionApp@1
-              inputs:
-                azureSubscription: $(azureSubscription)
-                resourceGroupName: $(resourceGroupName)
-                appType: functionAppLinux
-                appName: $(appName)
-                package: $(System.ArtifactsDirectory)/**/*.zip
-        
+          - task: AzureFunctionApp@1
+            inputs:
+              azureSubscription: $(azureSubscription)
+              resourceGroupName: $(resourceGroupName)
+              appType: functionAppLinux
+              appName: $(appName)
+              package: $(System.ArtifactsDirectory)/**/*.zip
+      

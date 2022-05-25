@@ -8,8 +8,10 @@ variables:
   appName: 'todo-api'
 
 stages:
+- stage: 'build'
 - template: templates/build.yaml
 
+- stage: 'dev infra'
 - template: templates/infra.yaml
   parameters:
     azureSubscription: azureSubscription
@@ -17,6 +19,7 @@ stages:
     appName: variables['appName']
     environmentName: dev
 
+- stage: 'dev_deploy'
 - template: templates/deploy.yaml
   parameters:
     azureSubscription: azureSubscription
@@ -24,6 +27,7 @@ stages:
     appName: variables['appName']
     environmentName: dev
 
+- stage: 'prod_infra'
 - template: templates/infra.yaml
   parameters:
     azureSubscription: azureSubscription
@@ -31,6 +35,7 @@ stages:
     appName: variables['appName']
     environmentName: prod
     
+- stage: 'prod_deploy'
 - template: templates/deploy.yaml
   parameters:
     azureSubscription: azureSubscription

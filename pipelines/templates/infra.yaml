@@ -20,7 +20,7 @@ parameters:
 stages:
 - stage: Infra
   jobs:
-  - deployment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}-deployment"
+  - deployment: "${{ parameters['environmentName'] }}_${{ parameters['appName'] }}_deployment"
     displayName: 'Deploy intrastructure to $(environmentName)'
     environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
     workspace:

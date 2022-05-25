@@ -59,7 +59,7 @@ jobs:
                   --query properties.outputs.functionName.value)
 
           - pwsh: |
-                echo "##vso[task.setvariable variable=funcName;isOutput=true]$($env:FUNC_NAME)"
+                echo "##vso[task.setvariable variable=funcName;isOutput=true]$FUNC_NAME"
             name: outputVars
 
 

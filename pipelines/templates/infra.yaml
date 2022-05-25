@@ -20,9 +20,9 @@ parameters:
 stages:
 - stage: Infra
   jobs:
-  - deployment: "${{ environmentName }}-infra-deployment"
+  - deployment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}-deployment"
     displayName: 'Deploy intrastructure to $(environmentName)'
-    environment: "${{ environmentName }}-${{ appName }}"
+    environment: "${{ parameters['environmentName'] }}-${{ parameters['appName'] }}"
     workspace:
       clean: all
     timeoutInMinutes: 10

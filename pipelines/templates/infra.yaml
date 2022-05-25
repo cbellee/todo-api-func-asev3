@@ -15,7 +15,7 @@ parameters:
     default: 'infra-deployment'
   - name: templateFileName
     type: string
-    default: '../iac/main.bicep'
+    default: 'main.bicep'
 
 jobs:
 - deployment: "${{ parameters.environmentName }}_${{ parameters.appName }}_infra"
@@ -31,6 +31,10 @@ jobs:
     runOnce:
       deploy:
         steps: 
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'bicep'
+
           - task: AzureCLI@2
             inputs:
               azureSubscription: $(azureSubscription)

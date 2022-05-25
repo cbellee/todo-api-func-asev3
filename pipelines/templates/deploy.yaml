@@ -25,7 +25,7 @@ jobs:
           - task: DownloadBuildArtifacts@1
             displayName: 'copy build artifacts'
             inputs:
-              artifactName: 'drop'
+              artifactName: 'function'
               buildVersionToDownload: latest
 
           - task: AzureFunctionApp@1

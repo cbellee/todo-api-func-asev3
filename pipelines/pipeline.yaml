@@ -2,62 +2,43 @@ trigger:
 - main
 
 name: 'todo-api build & deployment'
+resources:
+  repositories:
+    - repository: 
 
 variables:
   azureSubscription: 'Azure CXP FTA Internal Subscription CBELLEE (b2375b5f-8dab-4436-b87c-32bc7fdce5d0)'
   appName: 'todo-api'
-  vmImage: 'ubuntu-latest'
 
 stages:
-  - stage: 'build'
-    displayName: 'build application'
-    pool: 
-      vmImage: $(vmImage)
-    jobs:
-    - job: 'build'
-    - template: templates/build.yaml
-  
-  - stage: 'dev infrastructure deployment'
-    displayName: 'deploy dev infrastructure'
-    pool:
-      vmImage: $(vmImage)
-    jobs:
-    - job: 'infra deployment'
-    - template: templates/infra.yaml
-      parameters:
-        azureSubscription: azureSubscription
-        resourceGroupName: dev-$(appName)-rg
-        appName: dev-$(appName)
-        environmentName: dev
+- template: templates/build.yaml
 
-  - stage: 'dev application deployment'
-    jobs:
-    - job: 'app deployment'
-    - template: templates/deploy.yaml
-      parameters:
-        azureSubscription: azureSubscription
-        resourceGroupName: dev-$(appName)-rg
-        appName: dev-$(appName)
-        environmentName: dev
+- template: templates/infra.yaml
+  parameters:
+    azureSubscription: azureSubscription
+    resourceGroupName: dev-$(appName)-rg
+    appName: dev-$(appName)
+    environmentName: dev
 
-  - stage: 'prod infrastructure deployment'
-    jobs:
-    - job: 'infra deployment'
-    - template: templates/infra.yaml
-      parameters:
-        azureSubscription: azureSubscription
-        resourceGroupName: prod-$(appName)-rg
-        appName: prod-$(appName)
-        environmentName: prod
+- template: templates/deploy.yaml
+  parameters:
+    azureSubscription: azureSubscription
+    resourceGroupName: dev-$(appName)-rg
+    appName: dev-$(appName)
+    environmentName: dev
 
-  - stage: 'prod application deployment'     
-    jobs:
-    - job:   
-    - template: templates/deploy.yaml
-      parameters:
-        azureSubscription: azureSubscription
-        resourceGroupName: prod-$(appName)-rg
-        appName: prod-$(appName)
-        environmentName: prod
-          
-          
+- template: templates/infra.yaml
+  parameters:
+    azureSubscription: azureSubscription
+    resourceGroupName: prod-$(appName)-rg
+    appName: prod-$(appName)
+    environmentName: prod
+    
+- template: templates/deploy.yaml
+  parameters:
+    azureSubscription: azureSubscription
+    resourceGroupName: prod-$(appName)-rg
+    appName: prod-$(appName)
+    environmentName: prod
+    
+    

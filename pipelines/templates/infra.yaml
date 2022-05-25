@@ -22,34 +22,34 @@ jobs:
   displayName: 'Deploy intrastructure to ${{ parameters.environmentName }}'
   pool:
     vmImage: 'ubuntu-latest'
-    steps:        
-      
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifactName: 'bicep'
-        targetPath: $(Build.SourcesDirectory)/bicep
+  steps:        
+    
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifactName: 'bicep'
+      targetPath: $(Build.SourcesDirectory)/bicep
 
-    - task: AzureCLI@2
-      name: bicep
-      inputs:
-        azureSubscription: $(azureSubscription)
-        scriptType: bash
-        scriptLocation: inlineScript
-        inlineScript: |
-          az --version
-          az group create --name ${{ parameters.resourceGroupName }} --location ${{ parameters.location }}
+  - task: AzureCLI@2
+    name: bicep
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        az --version
+        az group create --name ${{ parameters.resourceGroupName }} --location ${{ parameters.location }}
 
-          az deployment group create \
-            --name ${{ parameters.deploymentName }} \
-            --resource-group ${{ parameters.resourceGroupName }} \
-            --template-file $(Build.SourcesDirectory)/bicep/${{ parameters.templateFileName }} \
-            --parameters appName=${{ parameters.appName }} \
-            --parameters location=${{ parameters.location }} \
-            --parameters environmentName=${{ parameters.environmentName }}
+        az deployment group create \
+          --name ${{ parameters.deploymentName }} \
+          --resource-group ${{ parameters.resourceGroupName }} \
+          --template-file $(Build.SourcesDirectory)/bicep/${{ parameters.templateFileName }} \
+          --parameters appName=${{ parameters.appName }} \
+          --parameters location=${{ parameters.location }} \
+          --parameters environmentName=${{ parameters.environmentName }}
 
-          FUNC_NAME=$(az deployment group show \
-            --resource-group ${{ parameters.resourceGroupName }} \
-            --name ${{ parameters.deploymentName }} \
-            --query properties.outputs.functionName.value)
+        FUNC_NAME=$(az deployment group show \
+          --resource-group ${{ parameters.resourceGroupName }} \
+          --name ${{ parameters.deploymentName }} \
+          --query properties.outputs.functionName.value)
 
-          echo "##vso[task.setvariable variable=funcName;isOutput=true]$FUNC_NAME"
+        echo "##vso[task.setvariable variable=funcName;isOutput=true]$FUNC_NAME"

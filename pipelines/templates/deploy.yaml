@@ -11,7 +11,7 @@ parameters:
     type: string
 
 jobs:
-- deployment: "${{ parameters.environmentName }}.deploy" #"${{ parameters.environmentName }}_${{ parameters.appName }}_deploy"
+- deployment: deploy #"${{ parameters.environmentName }}_${{ parameters.appName }}_deploy"
   displayName: "Deploy Todo API to ${{ parameters.environmentName }}"
   environment: "${{ parameters.environmentName }}-${{ parameters.appName }}"
   workspace:

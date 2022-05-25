@@ -47,7 +47,7 @@ jobs:
                 az deployment group create \
                   --name ${{ parameters.deploymentName }} \
                   --resource-group ${{ parameters.resourceGroupName }} \
-                  --template-file ${{ parameters.templateFile }} \
+                  --template-file ${{ parameters.templateFileName }} \
                   --parameters appName=${{ parameters.appName }} \
                   --parameters location=${{ parameters.location }} \
                   --parameters environmentName=${{ parameters.environmentName }}

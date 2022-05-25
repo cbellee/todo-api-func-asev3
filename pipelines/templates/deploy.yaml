@@ -27,7 +27,7 @@ jobs:
               inputs:
                 artifactName: 'drop'
                 buildVersionToDownload: latest
-                
+
             - task: AzureFunctionApp@1
               inputs:
                 azureSubscription: $(azureSubscription)
@@ -35,6 +35,4 @@ jobs:
                 appType: functionAppLinux
                 appName: $(appName)
                 package: $(System.ArtifactsDirectory)/**/*.zip
-                #deployToSlotOrASE: true  
-                #slotName: '<Slot name>'        
         

@@ -13,8 +13,9 @@ stages:
     pool: 
       vmImage: 'ubuntu-latest'
     jobs:
+      - job:
       - template: templates/build.yaml
-
+      
       - template: templates/infra.yaml
         parameters:
           azureSubscription: azureSubscription

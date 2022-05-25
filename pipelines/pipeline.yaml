@@ -10,7 +10,7 @@ variables:
 stages:
 - template: templates/build.yaml
 
-- stage: 'dev infra'
+- stage: 'dev_infra'
   jobs:
     - template: templates/infra.yaml
       parameters:

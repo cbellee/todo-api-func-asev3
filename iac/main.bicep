@@ -3,6 +3,7 @@ param appName string
 param environmentName string
 
 var prefix = uniqueString(resourceGroup().id)
+var funcAppName = '${prefix}-appName'
 var funcStorageAccountName = '${prefix}stor'
 var hostingPlanName = '${prefix}-asp'
 var appInsightsName = '${prefix}-ai'
@@ -62,7 +63,7 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
     appInsights
     hostingPlan
   ]
-  name: appName
+  name: funcAppName
   kind: 'functionapp,linux'
   location: location
   tags: {}

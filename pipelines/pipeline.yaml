@@ -6,16 +6,22 @@ name: 'todo-api build & deployment'
 variables:
   azureSubscription: 'Azure CXP FTA Internal Subscription CBELLEE (b2375b5f-8dab-4436-b87c-32bc7fdce5d0)'
   appName: 'todo-api'
+  vmImage: 'ubuntu-latest'
 
 stages:
   - stage: 'build'
-    displayName: 'build application'
+    displayName: 'Build application'
     pool: 
-      vmImage: 'ubuntu-latest'
+      vmImage: $(vmImage)
     jobs:
-      - job:
-      - template: templates/build.yaml
-      
+      - job: 'build'
+        template: templates/build.yaml
+  
+  - stage: 'infra'
+    displayName: 'Deploy Infrastructure'
+    pool:
+      vmImage: $(vmImage)
+    jobs:
       - template: templates/infra.yaml
         parameters:
           azureSubscription: azureSubscription

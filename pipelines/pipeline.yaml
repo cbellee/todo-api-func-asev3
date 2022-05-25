@@ -1,0 +1,49 @@
+trigger:
+- main
+
+name: 'todo-api build & deployment'
+resources:
+  repositories:
+    - repository: 
+
+variables:
+  azureSubscription: 'Azure CXP FTA Internal Subscription CBELLEE (b2375b5f-8dab-4436-b87c-32bc7fdce5d0)'
+  appName: 'todo-api'
+
+stages:
+  - stage: 'build'
+    displayName: 'build application'
+    pool: 
+      vmImage: 'ubuntu-latest'
+    jobs:
+      - template: templates/build.yaml
+
+      - template: templates/infra.yaml
+        parameters:
+          azureSubscription: azureSubscription
+          resourceGroupName: dev-$(appName)-rg
+          appName: dev-$(appName)
+          environmentName: dev
+
+      - template: templates/deploy.yaml
+        parameters:
+          azureSubscription: azureSubscription
+          resourceGroupName: dev-$(appName)-rg
+          appName: dev-$(appName)
+          environmentName: dev
+
+      - template: templates/infra.yaml
+        parameters:
+          azureSubscription: azureSubscription
+          resourceGroupName: prod-$(appName)-rg
+          appName: prod-$(appName)
+          environmentName: prod
+          
+      - template: templates/deploy.yaml
+        parameters:
+          azureSubscription: azureSubscription
+          resourceGroupName: prod-$(appName)-rg
+          appName: prod-$(appName)
+          environmentName: prod
+          
+          

@@ -1,0 +1,49 @@
+parameters:
+  - name: azureSubscription
+    type: string
+  - name: resourceGroupName
+    type: string
+  - name: appName
+    type: string
+  - name: environmentName
+    type: string
+  - name: location
+    type: string
+    default: 'australiaeast'
+  - name: deploymentName
+    type: string
+    default: '$(environmentName)-infra-deployment'
+  - name: templateFileName
+    type: string
+    default: '../iac/main.bicep'
+
+jobs:
+  - deployment: $(environmentName)-infra-deployment
+    displayName: 'Deploy intrastructure to $(environmentName)'
+    environment: $(environmentName)
+    workspace:
+      clean: all
+    timeoutInMinutes: 10
+    cancelTimeoutInMinutes: 15
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      runOnce:
+        deploy:
+          steps: 
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: $(azureSubscription)
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az --version
+                  az group create --name $(resourceGroupName) --location $(location)
+
+                  az deployment group create \
+                    --name $(deploymentName) \
+                    --resource-group $(resourceGroupName) \
+                    --template-file $(templateFile) \
+                    --parameters appName=$(appName) \
+                    --parameters location=$(location) \
+                    --parameters environmentName=$(environmentName)

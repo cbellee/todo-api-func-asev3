@@ -68,7 +68,7 @@ resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
   }
 }
 
-resource sqlServerFirewall 'Microsoft.Sql/servers/virtualNetworkRules@2021-11-01-preview' = {
+resource sqlServerVnetRules 'Microsoft.Sql/servers/virtualNetworkRules@2021-11-01-preview' = {
   parent: sqlServer
   name: 'firewall'
   properties: {
@@ -86,11 +86,19 @@ resource sqlDb 'Microsoft.Sql/servers/databases@2021-11-01-preview' = {
   tags: tags
 }
 
-module keyvault 'modules/keyvault.bicep' = {
-  name: 'deployKeyVault'
-  params: {
-    location: location
-    keyVaultName: kvName
+resource keyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
+  location: location
+  name: kvName
+  properties: {
+    enabledForDeployment: true
+    enabledForTemplateDeployment: true
+    enableSoftDelete: true
+    accessPolicies: []
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: tenantId
   }
 }
 
@@ -185,25 +193,8 @@ resource secret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   }
 }
 
-/* resource funcAppConfig 'Microsoft.Web/sites/config@2021-03-01' = {
-  parent: funcApp
-  name: 'appsettings'
-  properties: {
-    'DB_CXN': '@Microsoft.KeyVault(SecretUri=${secret.properties.secretUri})'
-    'FUNCTIONS_EXTENSION_VERSION': '~3'
-    'FUNCTIONS_WORKER_RUNTIME': 'custom'
-    'APPINSIGHTS_INSTRUMENTATIONKEY': reference('microsoft.insights/components/${appInsightsName}', '2015-05-01').InstrumentationKey
-    'AzureWebJobsStorage': 'DefaultEndpointsProtocol=https;AccountName=${funcStorageAccount.name};AccountKey=${listKeys(funcStorageAccount.id, '2019-06-01').keys[0].value};'
-    'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING': 'DefaultEndpointsProtocol=https;AccountName=${funcStorageAccount.name};AccountKey=${listKeys(funcStorageAccount.id, '2019-06-01').keys[0].value};'
-    'WEBSITE_DNS_SERVER': '168.63.129.16'
-  }
-} */
-
 module keyvaultPolicies 'modules/keyvault_policy.bicep' = {
   name: 'deployKeyVaultPolicies'
-  dependsOn: [
-    keyvault
-  ]
   params: {
     accessPolicies: [
       {
@@ -234,7 +225,7 @@ module keyvaultPolicies 'modules/keyvault_policy.bicep' = {
         objectId: funcApp.identity.principalId
       }
     ]
-    keyVaultName: keyvault.outputs.name
+    keyVaultName: keyvault.name
   }
 }
 

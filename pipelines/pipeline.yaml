@@ -53,7 +53,6 @@ stages:
         azureSubscription: ${{ variables.azureSubscription }}
         resourceGroupName: "prod-${{ variables.appName }}-rg"
         appName: ${{ variables.appName }}
-        functionAppName: $[stageDependencies.prod_infra.infra.outputs['infra.bicep.funcName']]
+        functionAppName: yjr53qywj6aoc-prod-todoapi #$[stageDependencies.prod_infra.infra.outputs['infra.bicep.funcName']]
         environmentName: prod
         
-    

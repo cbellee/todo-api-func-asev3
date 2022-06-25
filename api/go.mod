@@ -8,4 +8,5 @@ require (
 	github.com/jinzhu/gorm v1.9.16 // indirect
 	github.com/rs/cors v1.7.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
+	gorm.io/driver/sqlite v1.1.4 // indirect
 )

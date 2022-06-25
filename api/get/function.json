@@ -6,8 +6,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "post"
-      ]
+        "get"
+      ],
+      "route": "todos"
     },
     {
       "type": "http",

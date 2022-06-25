@@ -6,9 +6,10 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "post"
-      ]
-    },
+        "patch"
+      ],
+      "route": "todos/{id:int}"
+    }, 
     {
       "type": "http",
       "direction": "out",

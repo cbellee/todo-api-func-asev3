@@ -6,8 +6,9 @@
       "direction": "in",
       "name": "req",
       "methods": [
-        "delete"
-      ]
+        "post"
+      ],
+      "route": "todos"
     },
     {
       "type": "http",

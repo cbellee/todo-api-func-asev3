@@ -13,6 +13,7 @@ var hostingPlanName = '${prefix}-asp'
 var appInsightsName = '${prefix}-ai'
 var sqlServerName = '${prefix}-sql-server'
 var kvName = '${prefix}-kv'
+var vnetName = '${prefix}-vnet'
 var tenantId = tenant().tenantId
 var dbCxnString = 'server=${sqlServer.properties.fullyQualifiedDomainName};user id=${sqlAdminUserName};password=${sqlAdminUserPassword};port=1433;database=${sqlDbName}'
 
@@ -21,12 +22,57 @@ var tags = {
   costCenter: '1234567890'
 }
 
+resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
+  name: vnetName
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        '10.0.0.0/16'
+      ]
+    }
+    subnets: [
+      {
+        name: 'FunctionSubnet'
+        properties: {
+          addressPrefix: '10.0.0.0/24'
+          delegations: [
+            {
+              name: 'appSvcDelegation'
+              properties: {
+                serviceName: 'Microsoft.Web/serverFarms'
+              }
+            }
+          ]
+          serviceEndpoints: [
+            {
+              locations: [
+                location
+              ]
+              service: 'Microsoft.Sql'
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+
 resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
   name: sqlServerName
   location: location
   properties: {
     administratorLogin: sqlAdminUserName
     administratorLoginPassword: sqlAdminUserPassword
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource sqlServerFirewall 'Microsoft.Sql/servers/virtualNetworkRules@2021-11-01-preview' = {
+  parent: sqlServer
+  name: 'firewall'
+  properties: {
+    virtualNetworkSubnetId: vnet.properties.subnets[0].id
   }
 }
 
@@ -89,6 +135,7 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
   tags: {}
   properties: {
     siteConfig: {
+      vnetRouteAllEnabled: true
       appSettings: [
         {
           name: 'DB_CXN'
@@ -119,6 +166,15 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
     }
     serverFarmId: '/subscriptions/${subscription().subscriptionId}/resourcegroups/${resourceGroup().name}/providers/Microsoft.Web/serverfarms/${hostingPlanName}'
     clientAffinityEnabled: false
+  }
+}
+
+resource vnetIntegration 'Microsoft.Web/sites/networkConfig@2021-03-01' = {
+  name: 'virtualNetwork'
+  parent: funcApp
+  properties: {
+    subnetResourceId: vnet.properties.subnets[0].id
+    swiftSupported: true
   }
 }
 

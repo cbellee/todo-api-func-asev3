@@ -12,17 +12,24 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/rs/cors"
-	//_ "github.com/go-sql-driver/mysql"
-	//_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
-// var dbCxnString string = fmt.Sprintf("%s:%s@/%s?charset=utf8&parseTime=True&loc=Local", "root", "P@ssword123", "todolist")
-var db, _ = gorm.Open("sqlite3", "file::memory:?cache=shared")
+var dbCxn string = os.Getenv("DB_CXN")
+var db, _ = gorm.Open("mssql", dbCxn)
+
+func initDB(cxn string) *gorm.DB {
+	db, err := gorm.Open("mssql", cxn)
+	if err != nil {
+		log.Panic(err)
+	}
+	return db
+}
 
 type TodoItemEntity struct {
-	Id          int    `gorm:"primary_key"`
+	gorm.Model
 	Description string `json:"description"`
 	Completed   bool   `json:"completed"`
 }
@@ -130,7 +137,7 @@ func delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
-	allTodoItems := getAllTodoItems
+	allTodoItems := getAll()
 	log.Info("Get all TodoItems count: %d", allTodoItems)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(allTodoItems)
@@ -138,19 +145,25 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func getCompleted(w http.ResponseWriter, r *http.Request) {
 	log.Info("Get completed TodoItems")
-	completedTodoItems := getTodoItems(true)
+	completedTodoItems := getByCompletionStatus(true)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(completedTodoItems)
 }
 
 func getIncomplete(w http.ResponseWriter, r *http.Request) {
 	log.Info("Get Incomplete TodoItems")
-	incompleteTodoItems := getTodoItems(false)
+	incompleteTodoItems := getByCompletionStatus(false)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(incompleteTodoItems)
 }
 
-func getTodoItems(completed bool) interface{} {
+func getAll() interface{} {
+	var todos []TodoItemEntity
+	TodoItems := db.Find(&todos).Value
+	return TodoItems
+}
+
+func getByCompletionStatus(completed bool) interface{} {
 	var todos []TodoItemEntity
 	TodoItems := db.Where("completed = ?", completed).Find(&todos).Value
 	return TodoItems
@@ -164,13 +177,6 @@ func getItemById(Id int) bool {
 		return false
 	}
 	return true
-}
-
-func getAllTodoItems() interface{} {
-	var todos []TodoItemEntity
-	TodoItems := db.Find(&todos)
-	log.Info("getAllTodoItems: %d", TodoItems.Value)
-	return TodoItems
 }
 
 func main() {

@@ -6,7 +6,7 @@ info:
 servers:
   - url: ''
 paths:
-  /api/deleteItem/1:
+  /api/todos/1:
     delete:
       description: Auto generated using Swagger Inspector
       responses:
@@ -26,7 +26,7 @@ paths:
         - url: ''
     servers:
       - url: ''
-  /api/updateItem/2:
+  /api/todos/2:
     post:
       description: Auto generated using Swagger Inspector
       parameters:
@@ -52,7 +52,25 @@ paths:
         - url: ''
     servers:
       - url: ''
-  /api/createItem:
+  /api/todos:
+    get:
+      description: Auto generated using Swagger Inspector
+      responses:
+        '200':
+          description: Auto generated using Swagger Inspector
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+              examples:
+                '0':
+                  value: |
+                    [{"Id":1,"Description":"buy some milk","Completed":false},{"Id":2,"Description":"feed the dogs","Completed":true}]
+      servers:
+        - url: ''
+    servers:
+      - url: ''
     post:
       description: Auto generated using Swagger Inspector
       parameters:
@@ -60,7 +78,7 @@ paths:
           in: query
           schema:
             type: string
-          example: buysomemilk
+          example: 'buy some milk'
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -81,9 +99,7 @@ paths:
                     {"Id":1,"Description":"buysomemilk","Completed":false}
       servers:
         - url: ''
-    servers:
-      - url: ''
-  /api/getCompletedItems:
+  /api/todos/completed:
     get:
       description: Auto generated using Swagger Inspector
       responses:
@@ -102,7 +118,7 @@ paths:
         - url: ''
     servers:
       - url: ''
-  /api/getIncompleteItems:
+  /api/todos/incomplete:
     get:
       description: Auto generated using Swagger Inspector
       responses:

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 zipName=funcapp.zip
 location='australiaeast'
 appName='todo-api'
@@ -7,11 +9,11 @@ adminObjectId='57963f10-818b-406d-a2f6-6e758d86e259' # change to your user objec
 # create a file named '.env' in the same directory as this script 
 # add the line below to the file 
 # sqlAdminUserPassword=<your password> 
-
 # dot-source the ./.env file to load the password as an env var
 . ./.env
 
 # compile app
+# 'handler' executable is referenced in ../api/host.json '"defaultExecutablePath": "handler"'
 cd ../api
 go build -o handler
 

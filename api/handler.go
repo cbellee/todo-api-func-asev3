@@ -42,6 +42,46 @@ type CompleteTodoItem struct {
 	Completed bool `json:"completed"`
 }
 
+// main entry point
+func main() {
+	defer db.Close()
+
+	db.Debug().AutoMigrate(&TodoItemEntity{})
+
+/* 	if db.Debug().HasTable(&TodoItemEntity{}) {
+		db.Debug().AutoMigrate(&TodoItemEntity{})
+	} else {
+		db.Debug().DropTableIfExists(&TodoItemEntity{})
+		db.Debug().AutoMigrate(&TodoItemEntity{})
+	}
+ */
+
+	funcPrefix := "/api"
+	listenAddr := ":8080"
+
+	if val, ok := os.LookupEnv("FUNCTIONS_CUSTOMHANDLER_PORT"); ok {
+		listenAddr = ":" + val
+	}
+
+	log.Info("Starting ToDoList API Server")
+
+	router := mux.NewRouter()
+	router.HandleFunc(fmt.Sprintf("%s/healthz", funcPrefix), healthz).Methods("GET")
+	router.HandleFunc(fmt.Sprintf("%s/todos", funcPrefix), get).Methods("GET")
+	router.HandleFunc(fmt.Sprintf("%s/todos/completed", funcPrefix), getCompleted).Methods("GET")
+	router.HandleFunc(fmt.Sprintf("%s/todos/incomplete", funcPrefix), getIncomplete).Methods("GET")
+	router.HandleFunc(fmt.Sprintf("%s/todos", funcPrefix), create).Methods("POST")
+	router.HandleFunc(fmt.Sprintf("%s/todos/{id}", funcPrefix), update).Methods("PATCH")
+	router.HandleFunc(fmt.Sprintf("%s/todos/complete/{id}", funcPrefix), complete).Methods("PATCH")
+	router.HandleFunc(fmt.Sprintf("%s/todos/{id}", funcPrefix), delete).Methods("DELETE")
+
+	handler := cors.New(cors.Options{
+		AllowedMethods: []string{"GET", "POST", "DELETE", "PATCH", "OPTIONS"},
+	}).Handler(router)
+
+	http.ListenAndServe(listenAddr, handler)
+}
+
 func healthz(w http.ResponseWriter, r *http.Request) {
 	log.Info("API Health is OK")
 	w.Header().Set("Content-Type", "application/json")
@@ -57,8 +97,8 @@ func create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	t := CreateOrUpdateTodoItem{}
-	err := json.NewDecoder(r.Body).Decode(&t)
 
+	err := json.NewDecoder(r.Body).Decode(&t)
 	if err != nil {
 		errMsg := fmt.Sprintf("{\"created: false, \"error\": \"%s\"}", err)
 		io.WriteString(w, errMsg)
@@ -177,36 +217,4 @@ func getItemById(Id int) bool {
 		return false
 	}
 	return true
-}
-
-func main() {
-	defer db.Close()
-
-	db.Debug().DropTableIfExists(&TodoItemEntity{})
-	db.Debug().AutoMigrate(&TodoItemEntity{})
-
-	funcPrefix := "/api"
-	listenAddr := ":8080"
-
-	if val, ok := os.LookupEnv("FUNCTIONS_CUSTOMHANDLER_PORT"); ok {
-		listenAddr = ":" + val
-	}
-
-	log.Info("Starting ToDoList API Server")
-
-	router := mux.NewRouter()
-	router.HandleFunc(fmt.Sprintf("%s/healthz", funcPrefix), healthz).Methods("GET")
-	router.HandleFunc(fmt.Sprintf("%s/todos", funcPrefix), get).Methods("GET")
-	router.HandleFunc(fmt.Sprintf("%s/todos/completed", funcPrefix), getCompleted).Methods("GET")
-	router.HandleFunc(fmt.Sprintf("%s/todos/incomplete", funcPrefix), getIncomplete).Methods("GET")
-	router.HandleFunc(fmt.Sprintf("%s/todos", funcPrefix), create).Methods("POST")
-	router.HandleFunc(fmt.Sprintf("%s/todos/{id}", funcPrefix), update).Methods("PATCH")
-	router.HandleFunc(fmt.Sprintf("%s/todos/complete/{id}", funcPrefix), complete).Methods("PATCH")
-	router.HandleFunc(fmt.Sprintf("%s/todos/{id}", funcPrefix), delete).Methods("DELETE")
-
-	handler := cors.New(cors.Options{
-		AllowedMethods: []string{"GET", "POST", "DELETE", "PATCH", "OPTIONS"},
-	}).Handler(router)
-
-	http.ListenAndServe(listenAddr, handler)
 }

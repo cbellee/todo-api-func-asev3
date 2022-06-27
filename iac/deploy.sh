@@ -3,7 +3,7 @@
 zipName=funcapp.zip
 location='australiaeast'
 appName='todo-api'
-rgName="$appName-func-rg"
+rgName="$appName-funcapp-rg"
 adminObjectId='57963f10-818b-406d-a2f6-6e758d86e259' # change to your user objectID
 
 # create a file named '.env' in the same directory as this script 

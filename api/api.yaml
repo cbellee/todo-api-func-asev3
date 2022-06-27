@@ -6,9 +6,17 @@ info:
 servers:
   - url: ''
 paths:
-  /api/todos/1:
+  /api/todos/{id}:
     delete:
       description: Auto generated using Swagger Inspector
+      summary: delete a todo
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          example: 1
+          required: true
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -19,22 +27,20 @@ paths:
                 properties:
                   deleted:
                     type: boolean
-              examples:
+              example:
                 '0':
                   value: '{"deleted": true}'
-      servers:
-        - url: ''
-    servers:
-      - url: ''
-  /api/todos/2:
-    post:
+  /api/todos/complete/{id}:
+    patch:
       description: Auto generated using Swagger Inspector
+      summary: complete a todo
       parameters:
-        - name: completed
-          in: query
+        - name: id
+          in: path
           schema:
-            type: boolean
-          example: 'true'
+            type: integer
+          example: 1
+          required: true
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -45,40 +51,35 @@ paths:
                 properties:
                   updated:
                     type: boolean
-              examples:
+              example:
                 '0':
                   value: '{"updated": true}'
-      servers:
-        - url: ''
-    servers:
-      - url: ''
   /api/todos:
     get:
       description: Auto generated using Swagger Inspector
+      summary: get all todos
       responses:
         '200':
           description: Auto generated using Swagger Inspector
           content:
             application/json:
               schema:
-                type: object
+                type: array
                 properties: {}
-              examples:
+              example:
                 '0':
                   value: |
-                    [{"Id":1,"Description":"buy some milk","Completed":false},{"Id":2,"Description":"feed the dogs","Completed":true}]
-      servers:
-        - url: ''
-    servers:
-      - url: ''
+                    []
     post:
       description: Auto generated using Swagger Inspector
-      parameters:
-        - name: description
-          in: query
-          schema:
-            type: string
-          example: 'buy some milk'
+      summary: create a todo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/newTodo'
+            example:
+              description: 'buy some milk'
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -93,15 +94,14 @@ paths:
                     type: boolean
                   Id:
                     type: integer
-              examples:
+              example:
                 '0':
                   value: |
-                    {"Id":1,"Description":"buysomemilk","Completed":false}
-      servers:
-        - url: ''
+                    {"Id":1,"description":"buy somemilk","completed":false}
   /api/todos/completed:
     get:
       description: Auto generated using Swagger Inspector
+      summary: get all completed todos
       responses:
         '200':
           description: Auto generated using Swagger Inspector
@@ -110,30 +110,42 @@ paths:
               schema:
                 type: object
                 properties: {}
-              examples:
+              example:
                 '0':
                   value: |
                     []
       servers:
         - url: ''
-    servers:
-      - url: ''
   /api/todos/incomplete:
     get:
       description: Auto generated using Swagger Inspector
+      summary: get all incomplete todos
       responses:
         '200':
           description: Auto generated using Swagger Inspector
           content:
             application/json:
               schema:
-                type: object
-                properties: {}
-              examples:
+                $ref: '#/components/schemas/todo'
+              example:
                 '0':
                   value: |
-                    [{"Id":1,"Description":"buysomemilk","Completed":false}]
-      servers:
-        - url: ''
-    servers:
-      - url: ''
+                    []
+components:
+  schemas:
+    todo:
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        completeted:
+          type: boolean
+        createdAt:
+          type: string
+        modifiedAt:
+          type: string
+    newTodo:
+      properties:
+        description:
+          type: string

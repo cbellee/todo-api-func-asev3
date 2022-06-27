@@ -1,25 +1,33 @@
+appName='todo-api'
+rgName="$appName-funcapp-rg"
+
+FUNCTION_NAME=$(az deployment group show --name 'infra-deployment' -g $rgName --query properties.outputs.functionName.value -o tsv)
+URL="https://$FUNCTION_NAME.azurewebsites.net"
+
 # create #1, #2, #3
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos -X POST -d '{"description": "first todo item"}'
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos -X POST -d '{"description": "second todo item"}'
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos -X POST -d '{"description": "third todo item"}'
+curl $URL/api/todos --insecure -X POST -d '{"description":"first todo item"}'
+curl $URL/api/todos --insecure -X POST -d '{"description":"second todo item"}'
+curl $URL/api/todos --insecure -X POST -d '{"description":"third todo item"}'
+curl $URL/api/todos --insecure -X POST -d '{"description":"fourth todo item"}'
 
 # update
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos/1 -X PATCH -d '{"description": "really the first todo item"}'
+curl $URL/api/todos/1 --insecure -X PATCH -d '{"description":"really the first todo item"}'
 
 # list all
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos
+curl $URL/api/todos --insecure
 
 # complete #3
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos/complete/3 -X PATCH
+curl $URL/api/todos/complete/3 --insecure -X PATCH
 
 # list completed
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos/completed
+curl $URL/api/todos/completed --insecure
 
 # list incomplete
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos/incomplete
+curl $URL/api/todos/incomplete --insecure
 
 #delete #2
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos/2 -X DELETE
+curl $URL/api/todos/4 --insecure -X DELETE -d '{}'
 
 # list all
-curl https://q5as3mfg4ljbc-dev-todo-api.azurewebsites.net/api/todos
+curl $URL/api/todos --insecure
+

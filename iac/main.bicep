@@ -12,7 +12,7 @@ var funcStorageAccountName = '${prefix}stor'
 var hostingPlanName = '${prefix}-asp'
 var appInsightsName = '${prefix}-ai'
 var sqlServerName = '${prefix}-sql-server'
-var kvName = '${prefix}-kv'
+var kvName = 'kv-${prefix}'
 var vnetName = '${prefix}-vnet'
 var tenantId = tenant().tenantId
 var dbCxnString = 'server=${sqlServer.properties.fullyQualifiedDomainName};user id=${sqlAdminUserName};password=${sqlAdminUserPassword};port=1433;database=${sqlDbName}'
@@ -187,7 +187,8 @@ resource vnetIntegration 'Microsoft.Web/sites/networkConfig@2021-03-01' = {
 }
 
 resource secret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  name: '${kvName}/dbCxnString'
+  name: 'dbCxnString'
+  parent: keyvault
   properties: {
     value: dbCxnString
   }

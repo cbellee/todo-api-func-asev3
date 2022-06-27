@@ -8,7 +8,7 @@
       "methods": [
         "patch"
       ],
-      "route": "todos/complete/{id:int}"
+      "route": "todos/complete/{id}"
     }, 
     {
       "type": "http",

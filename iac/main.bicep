@@ -65,6 +65,14 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           privateLinkServiceNetworkPolicies: 'Enabled'
         }
       }
+      {
+        name: 'vmSubnet'
+        properties: {
+          addressPrefix: '10.0.2.0/24'
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
     ]
   }
 }
@@ -159,10 +167,6 @@ resource storageTablePrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01
       }
     ]
   }
-}
-
-resource aseConfig 'Microsoft.Web/hostingEnvironments/configurations@2021-01-15' existing = {
-  name: '${aseName}/networking'
 }
 
 resource storageBlobPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {

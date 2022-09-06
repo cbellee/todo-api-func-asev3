@@ -11,22 +11,12 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mssql"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/rs/cors"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-var dbCxn string = os.Getenv("DB_CXN")
-var db, _ = gorm.Open("mssql", dbCxn)
-
-func initDB(cxn string) *gorm.DB {
-	db, err := gorm.Open("mssql", cxn)
-	if err != nil {
-		log.Panic(err)
-	}
-	return db
-}
+var db *gorm.DB
 
 type TodoItemEntity struct {
 	gorm.Model
@@ -44,10 +34,13 @@ type CompleteTodoItem struct {
 
 // main entry point
 func main() {
-	defer db.Close()
+	var err error
+	db, err = gorm.Open(sqlite.Open("file:memdb1?mode=memory&cache=shared"), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("Failed to open db: %v", err)
+	}
 
-	db.Debug().AutoMigrate(&TodoItemEntity{})
-
+	db.Migrator().AutoMigrate(&TodoItemEntity{})
 	funcPrefix := "/api"
 	listenAddr := ":8080"
 
@@ -106,7 +99,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	todo := &TodoItemEntity{Description: t.Description, Completed: false}
 	db.Create(&todo)
 	result := db.Last(&todo)
-	json.NewEncoder(w).Encode(result.Value)
+	json.NewEncoder(w).Encode(result)
 }
 
 func update(w http.ResponseWriter, r *http.Request) {
@@ -169,7 +162,11 @@ func delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func get(w http.ResponseWriter, r *http.Request) {
-	allTodoItems := getAll()
+	allTodoItems, err := getAll()
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+	}
 	log.Info("Get all TodoItems count: %d", allTodoItems)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(allTodoItems)
@@ -177,28 +174,43 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 func getCompleted(w http.ResponseWriter, r *http.Request) {
 	log.Info("Get completed TodoItems")
-	completedTodoItems := getByCompletionStatus(true)
+	completedTodoItems, err := getByCompletionStatus(true)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(completedTodoItems)
 }
 
 func getIncomplete(w http.ResponseWriter, r *http.Request) {
 	log.Info("Get Incomplete TodoItems")
-	incompleteTodoItems := getByCompletionStatus(false)
+	incompleteTodoItems, err := getByCompletionStatus(false)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(incompleteTodoItems)
 }
 
-func getAll() interface{} {
+func getAll() (items []TodoItemEntity, err error) {
 	var todos []TodoItemEntity
-	TodoItems := db.Find(&todos).Value
-	return TodoItems
+	err = db.Find(&todos).Error
+	if err != nil {
+		return nil, err
+	}
+	return todos, nil
 }
 
-func getByCompletionStatus(completed bool) interface{} {
+func getByCompletionStatus(completed bool) (items []TodoItemEntity, err error) {
 	var todos []TodoItemEntity
-	TodoItems := db.Where("completed = ?", completed).Find(&todos).Value
-	return TodoItems
+	err = db.Where("completed = ?", completed).Find(&todos).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return todos, nil
 }
 
 func getItemById(Id int) bool {

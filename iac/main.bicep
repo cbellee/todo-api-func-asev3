@@ -1,25 +1,34 @@
 param location string
 param appName string
 param environment string
-param sqlAdminUserName string = 'sqladmin'
-param sqlAdminUserPassword string
-param adminObjectId string
-param sqlDbName string = 'todosDb'
+param containerImageName string
+param acrName string
+param shareName string = 'myshare'
+param mountPath string = '/mnt'
 
-var prefix = uniqueString(resourceGroup().id)
-var funcAppName = '${prefix}-${environment}-${appName}'
-var funcStorageAccountName = '${prefix}stor'
-var hostingPlanName = '${prefix}-asp'
-var appInsightsName = '${prefix}-ai'
-var sqlServerName = '${prefix}-sql-server'
-var kvName = 'kv-${prefix}'
-var vnetName = '${prefix}-vnet'
+@description('App service plan sku.')
+param sku string = 'IsolatedV2'
+
+@description('App service plan sku code.')
+param skuCode string = 'I1V2'
+
+var affix = uniqueString(resourceGroup().id)
+var funcAppName = '${affix}-${environment}-${appName}'
+var funcStorageAccountName = '${affix}stor'
+var hostingPlanName = 'asp-${affix}'
+var appInsightsName = 'ai-${affix}'
+var kvName = 'kv-app-${affix}'
+var vnetName = '${affix}-vnet'
 var tenantId = tenant().tenantId
-var dbCxnString = 'server=${sqlServer.properties.fullyQualifiedDomainName};user id=${sqlAdminUserName};password=${sqlAdminUserPassword};port=1433;database=${sqlDbName}'
+var aseName = 'asev3-${affix}'
 
 var tags = {
   environment: environment
   costCenter: '1234567890'
+}
+
+resource acr 'Microsoft.ContainerRegistry/registries@2022-02-01-preview' existing = {
+  name: acrName
 }
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
@@ -33,57 +42,31 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
     }
     subnets: [
       {
-        name: 'FunctionSubnet'
+        name: 'aseSubnet'
         properties: {
           addressPrefix: '10.0.0.0/24'
           delegations: [
             {
-              name: 'appSvcDelegation'
+              name: 'Microsoft.Web.hostingEnvironments'
               properties: {
-                serviceName: 'Microsoft.Web/serverFarms'
+                serviceName: 'Microsoft.Web/hostingEnvironments'
               }
             }
           ]
-          serviceEndpoints: [
-            {
-              locations: [
-                location
-              ]
-              service: 'Microsoft.Sql'
-            }
-          ]
+          privateEndpointNetworkPolicies: 'Enabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
+        }
+      }
+      {
+        name: 'privateLinkSubnet'
+        properties: {
+          addressPrefix: '10.0.1.0/24'
+          privateEndpointNetworkPolicies: 'Disabled'
+          privateLinkServiceNetworkPolicies: 'Enabled'
         }
       }
     ]
   }
-}
-
-resource sqlServer 'Microsoft.Sql/servers@2021-11-01-preview' = {
-  name: sqlServerName
-  location: location
-  properties: {
-    administratorLogin: sqlAdminUserName
-    administratorLoginPassword: sqlAdminUserPassword
-    publicNetworkAccess: 'Enabled'
-  }
-}
-
-resource sqlServerVnetRules 'Microsoft.Sql/servers/virtualNetworkRules@2021-11-01-preview' = {
-  parent: sqlServer
-  name: 'firewall'
-  properties: {
-    virtualNetworkSubnetId: vnet.properties.subnets[0].id
-  }
-}
-
-resource sqlDb 'Microsoft.Sql/servers/databases@2021-11-01-preview' = {
-  location: location
-  name: sqlDbName
-  parent: sqlServer
-  sku: {
-    name: 'Free'
-  }
-  tags: tags
 }
 
 resource keyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
@@ -115,7 +98,223 @@ resource funcStorageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' = {
   }
 }
 
-resource hostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
+resource storageBlobPrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = {
+  name: 'storage-blob-private-endpoint'
+  location: location
+  properties: {
+    subnet: {
+      id: vnet.properties.subnets[1].id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'storage-blob-plink'
+        properties: {
+          privateLinkServiceId: funcStorageAccount.id
+          groupIds: [
+            'blob'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource storageFilePrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = {
+  name: 'storage-file-private-endpoint'
+  location: location
+  properties: {
+    subnet: {
+      id: vnet.properties.subnets[1].id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'storage-file-plink'
+        properties: {
+          privateLinkServiceId: funcStorageAccount.id
+          groupIds: [
+            'file'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource storageTablePrivateEndpoint 'Microsoft.Network/privateEndpoints@2022-01-01' = {
+  name: 'storage-table-private-endpoint'
+  location: location
+  properties: {
+    subnet: {
+      id: vnet.properties.subnets[1].id
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'storage-table-plink'
+        properties: {
+          privateLinkServiceId: funcStorageAccount.id
+          groupIds: [
+            'table'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource aseConfig 'Microsoft.Web/hostingEnvironments/configurations@2021-01-15' existing = {
+  name: '${aseName}/networking'
+}
+
+resource storageBlobPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.blob.core.windows.net'
+  location: 'global'
+}
+
+resource storageFilePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.file.core.windows.net'
+  location: 'global'
+}
+
+resource storageTablePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.table.core.windows.net'
+  location: 'global'
+}
+
+resource asev3PrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: '${aseName}.appserviceenvironment.net'
+  location: 'global'
+}
+
+resource webRecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  parent: asev3PrivateDnsZone
+  name: '*'
+  properties: {
+    ttl: 3600
+    aRecords: [
+      {
+        ipv4Address: asev3.outputs.privateIpAddress
+      }
+    ]
+  }
+}
+
+resource scmRecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  parent: asev3PrivateDnsZone
+  name: '*.scm'
+  properties: {
+    ttl: 3600
+    aRecords: [
+      {
+        ipv4Address: asev3.outputs.privateIpAddress
+      }
+    ]
+  }
+}
+
+resource aRecord 'Microsoft.Network/privateDnsZones/A@2020-06-01' = {
+  parent: asev3PrivateDnsZone
+  name: '@'
+  properties: {
+    ttl: 3600
+    aRecords: [
+      {
+        ipv4Address: asev3.outputs.privateIpAddress
+      }
+    ]
+  }
+}
+
+resource storageBlobPrivateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2022-01-01' = {
+  name: '${storageBlobPrivateEndpoint.name}/default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'privatelink-blob-storage'
+        properties: {
+          privateDnsZoneId: storageBlobPrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource storageFilePrivateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2022-01-01' = {
+  name: '${storageFilePrivateEndpoint.name}/default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'privatelink-file-storage'
+        properties: {
+          privateDnsZoneId: storageFilePrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource storageTablePrivateDNSZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2022-01-01' = {
+  name: '${storageTablePrivateEndpoint.name}/default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'privatelink-table-storage'
+        properties: {
+          privateDnsZoneId: storageTablePrivateDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource storageBlobPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  name: 'blob-storage-dns-zone-link'
+  parent: storageBlobPrivateDnsZone
+  location: 'global'
+  properties: {
+    virtualNetwork: {
+      id: vnet.id
+    }
+    registrationEnabled: false
+  }
+}
+
+resource storageFilePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  name: 'file-storage-dns-zone-link'
+  parent: storageFilePrivateDnsZone
+  location: 'global'
+  properties: {
+    virtualNetwork: {
+      id: vnet.id
+    }
+    registrationEnabled: false
+  }
+}
+
+resource storageTablePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  name: 'table-storage-dns-zone-link'
+  parent: storageTablePrivateDnsZone
+  location: 'global'
+  properties: {
+    virtualNetwork: {
+      id: vnet.id
+    }
+    registrationEnabled: false
+  }
+}
+
+resource asev3PrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  name: 'asev3-dns-zone-link'
+  parent: asev3PrivateDnsZone
+  location: 'global'
+  properties: {
+    virtualNetwork: {
+      id: vnet.id
+    }
+    registrationEnabled: false
+  }
+}
+
+/* resource hostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
   name: hostingPlanName
   location: location
   sku: {
@@ -127,12 +326,40 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2020-06-01' = {
     reserved: true
     maximumElasticWorkerCount: 20
   }
+  dependsOn: [
+    storageBlobPrivateDnsZoneLink
+    storageFilePrivateDnsZoneLink
+    storageTablePrivateDnsZoneLink
+  ]
+} */
+
+module asev3 'modules/ase.bicep' = {
+  name: 'ase-deployment'
+  params: {
+    name: 'asev3'
+    location: location
+    subnetId: vnet.properties.subnets[0].id
+  }
+}
+
+resource hostingPlan 'Microsoft.Web/serverfarms@2021-01-15' = {
+  name: hostingPlanName
+  location: location
+  sku: {
+    tier: sku
+    name: skuCode
+  }
+  properties: {
+    hostingEnvironmentProfile: {
+      id: resourceId('Microsoft.Web/hostingEnvironments', asev3.outputs.aseName)
+    }
+  }
 }
 
 resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
   dependsOn: [
     appInsights
-    hostingPlan
+    asev3
   ]
   name: funcAppName
   identity: {
@@ -144,10 +371,15 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
   properties: {
     siteConfig: {
       vnetRouteAllEnabled: true
+      linuxFxVersion: 'DOCKER|${containerImageName}'
       appSettings: [
         {
-          name: 'DB_CXN'
-          value: '@Microsoft.KeyVault(SecretUri=${secret.properties.secretUri})'
+          name: 'WEBSITE_DNS_SERVER'
+          value: '168.63.129.16'
+        }
+        {
+          name: 'WEBSITE_CONTENTOVERVNET'
+          value: '1'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -169,6 +401,18 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
           name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
           value: 'DefaultEndpointsProtocol=https;AccountName=${funcStorageAccount.name};AccountKey=${listKeys(funcStorageAccount.id, '2019-06-01').keys[0].value};'
         }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_PASSWORD'
+          value: acr.listCredentials().passwords[0].value
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_URL'
+          value: acr.properties.loginServer
+        }
+        {
+          name: 'DOCKER_REGISTRY_SERVER_USERNAME'
+          value: acr.name
+        }
       ]
       use32BitWorkerProcess: false
     }
@@ -177,56 +421,16 @@ resource funcApp 'Microsoft.Web/sites@2021-01-01' = {
   }
 }
 
-resource vnetIntegration 'Microsoft.Web/sites/networkConfig@2021-03-01' = {
-  name: 'virtualNetwork'
-  parent: funcApp
+resource storageSetting 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: '${funcAppName}/azurestorageaccounts'
   properties: {
-    subnetResourceId: vnet.properties.subnets[0].id
-    swiftSupported: true
-  }
-}
-
-resource secret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
-  name: 'dbCxnString'
-  parent: keyvault
-  properties: {
-    value: dbCxnString
-  }
-}
-
-module keyvaultPolicies 'modules/keyvault_policy.bicep' = {
-  name: 'deployKeyVaultPolicies'
-  params: {
-    accessPolicies: [
-      {
-        permissions: {
-          keys: [
-            'all'
-          ]
-          secrets: [
-            'all'
-          ]
-          certificates: [
-            'all'
-          ]
-        }
-        tenantId: tenantId
-        objectId: adminObjectId
-      }
-      {
-        permissions: {
-          secrets: [
-            'get'
-            'list'
-          ]
-          keys: []
-          certificates: []
-        }
-        tenantId: tenantId
-        objectId: funcApp.identity.principalId
-      }
-    ]
-    keyVaultName: keyvault.name
+    '${shareName}': {
+      type: 'AzureFiles'
+      shareName: shareName
+      mountPath: mountPath
+      accountName: funcStorageAccount.name
+      accessKey: listKeys(funcStorageAccount.id, funcStorageAccount.apiVersion).keys[0].value
+    }
   }
 }
 
@@ -241,4 +445,3 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02-preview' = {
 }
 
 output functionName string = funcApp.name
-output dbName string = sqlDb.name

@@ -17,9 +17,7 @@ var funcAppName = '${affix}-${environment}-${appName}'
 var funcStorageAccountName = '${affix}stor'
 var hostingPlanName = 'asp-${affix}'
 var appInsightsName = 'ai-${affix}'
-var kvName = 'kv-app-${affix}'
 var vnetName = '${affix}-vnet'
-var tenantId = tenant().tenantId
 var aseName = 'asev3-${affix}'
 
 var tags = {
@@ -74,22 +72,6 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
         }
       }
     ]
-  }
-}
-
-resource keyvault 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
-  location: location
-  name: kvName
-  properties: {
-    enabledForDeployment: true
-    enabledForTemplateDeployment: true
-    enableSoftDelete: true
-    accessPolicies: []
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    tenantId: tenantId
   }
 }
 
